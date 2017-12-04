@@ -13,7 +13,7 @@ public class MQTTUtility {
 	
 	public static final String MQTT_URL_START = "tcp://";
 	public static final String MQTT_PATH_DELIM = "/";
-	public static final int MQTT_PATH_MIN_PARTS = 3;
+	public static final int MQTT_PATH_MIN_PARTS = 1;
 	public static final String MQTT_PERSISTENCE_SUBDIR = "/mqtt";
 	public static String buildBrokerURL(String server, Integer port){
 		StringBuilder sb = new StringBuilder();
@@ -23,14 +23,12 @@ public class MQTTUtility {
 		sb.append(port);
 		return sb.toString();
 	}	
-	// tcp://localhost:1833/path1/path2/device
-	// This returns a null if topic doesn't seem correct.
+
 	public static AnalysisCompoundData buildAnalysisData (String topic, String data){
 		String[] parts = topic.split("/");
 		int lastPart = parts.length -1;
 		if (lastPart <= MQTT_PATH_MIN_PARTS)
 			return null;
-
 		AnalysisCompoundData acdNext = null;
 		AnalysisCompoundData acdFirst = null;
 		AnalysisCompoundData acdLast = null;
@@ -72,10 +70,7 @@ public class MQTTUtility {
 	}
 	public static String buildTopicPublishPath(String server, Integer port, String path, String devid){
 		StringBuilder sb = new StringBuilder();
-		sb.append(MQTT_URL_START);
-		sb.append(server);
-		sb.append(":");
-		sb.append(port);
+
 		sb.append(MQTT_PATH_DELIM);
 		sb.append(path);
 		sb.append(MQTT_PATH_DELIM);		
@@ -84,10 +79,6 @@ public class MQTTUtility {
 	}		
 	public static String buildTopicSubscribePath(String server, Integer port, String path, String devid){
 		StringBuilder sb = new StringBuilder();
-		sb.append(MQTT_URL_START);
-		sb.append(server);
-		sb.append(":");
-		sb.append(port);
 		sb.append(MQTT_PATH_DELIM);
 		sb.append(path);
 		if (!path.contains("#")&& devid != null){
