@@ -9,7 +9,7 @@
     <attr name="NodeQuality" >Released</attr>     
     <datadef  name="Password">
        <attr name="EditOrder" type="Integer">23</attr>   
-       <attr name="Desc" >The MD5 encrypted password for the user.</attr>		 
+       <attr name="Desc" >The MD5 encrypted password for the  user.</attr>		 
 		<attr name="Category">Standard</attr>
 		<attr name="SpecialType">Password</attr>
 	</datadef>
