@@ -5,7 +5,7 @@
 	<attr name="ConsumedEventTypes">NONE</attr>
     <attr name="PublishedEventTypes">Event,Trigger</attr>
     <attr name="NodeDescTemplate">SUB to ${DevicePath}/${DeviceId}</attr>
-    <attr name="NodeOverview">Listens for and receives MQTT messages.</attr>	
+    <attr name="NodeOverview">Listens for and receives MQTT messages on a specific topic or topics</attr>	
     <attr name="NodeQuality" >Released</attr>     
     <datadef  name="Password">
        <attr name="EditOrder" type="Integer">23</attr>   
