@@ -1,0 +1,3 @@
+[submodule "VDABCore"]
+	path = VDABCore
+	url = http://github.com/vdabtec/VDABCore.git
