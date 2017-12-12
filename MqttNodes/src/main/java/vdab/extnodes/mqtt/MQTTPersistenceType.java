@@ -1,5 +1,6 @@
 package vdab.extnodes.mqtt;
 
+
 import com.lcrc.af.datatypes.AFEnum;
 
 public class MQTTPersistenceType {
