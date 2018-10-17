@@ -1,3 +1,18 @@
+/*LICENSE*
+ * Copyright (C) 2013 - 2018 MJA Technology LLC 
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 package vdab.extnodes.mqtt;
 
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
@@ -7,6 +22,8 @@ import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttTopic;
+
+import com.lcrc.af.AnalysisData;
 import com.lcrc.af.AnalysisEvent;
 import com.lcrc.af.AnalysisSource;
 import com.lcrc.af.constants.IconCategory;
@@ -152,12 +169,19 @@ public class MQTTSource extends AnalysisSource implements MqttCallback {
 	@Override
 	public synchronized void messageArrived(String topicName, MqttMessage msg) throws Exception {
 		try {
-		String msgStr = new String(msg.getPayload());
-		/* HACKALERT - This fails with a null pointer exception
-		if (MQTTSource.this.isLogLevel(LogLevel.TRACE))
+			String msgStr = new String(msg.getPayload());
+			/* HACKALERT - This fails with a null pointer exception
+			if (MQTTSource.this.isLogLevel(LogLevel.TRACE))
 			MQTTSource.this.logTrace("MQTT SUBSCRIBER received MSG="+msgStr+" TOPIC="+topicName);	
-		*/
-		publish(new AnalysisEvent(MQTTSource.this, MQTTUtility.buildAnalysisData(topicName, msgStr)));
+			 */
+			AnalysisData ad = MQTTUtility.buildAnalysisData(topicName, msgStr);
+			if (ad != null){
+				publish(new AnalysisEvent(MQTTSource.this, ad));
+
+			}
+			else {
+				setWarning("MQTT could not parse the topic TOPIC="+topicName);
+			}
 		}
 		catch (Exception e){
 			setError("MQTT SUBSCRIBER Received message error e>"+e);
