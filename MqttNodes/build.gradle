@@ -6,7 +6,7 @@ targetCompatibility = 1.7
 
 
 dependencies {
-    compile files('libs/VDABCore.jar','libs/org.eclipse.paho.client.mqttv3-1.2.0.jar' )
+    compile files('build/vdab/VDABCore.jar','libs/org.eclipse.paho.client.mqttv3-1.2.0.jar' )
 }
  
 //Get dependencies from Maven central repository
@@ -17,7 +17,7 @@ repositories {
 // Fetch a fresh VDABCore from vdabtec.com
 task getVDABCore(type: GetFile) {
     sourceUrl = 'http://vdabtec.com/vdab/products/VDABCore.jar'
-    target = file('libs/VDABCore.jar')
+    target = file('build/vdab/VDABCore.jar')
 }
 class GetFile extends DefaultTask {
     @Input
@@ -34,20 +34,25 @@ class GetFile extends DefaultTask {
 tasks.compileJava.dependsOn([getVDABCore])
 
 task vdabPackage(dependsOn: [build]){
-	doLast {
-		def jarFiles = file('./libs').listFiles()
-		jarFiles.each {File nextFile ->
-		println ">>>>> Including JAR= $nextFile.name"
+		doLast {
+			def jarFiles = file('./libs').listFiles()
+			jarFiles.each {File nextFile ->
+			println ">>>>> Included JAR= $nextFile.name"
+			
 		}
+		copy {
+			from 'pkg'
+			into 'build/vdab/pkg'
+		}
+
 		copy {
 			from 'libs'
 			from 'build/libs'
-			into 'pkg/ext'
-			exclude 'VDABCore.jar'
+			into 'build/vdab/pkg/ext'
 		}
+		
 		ant.zip(destfile: 'PKG_MqttNodes.zip'){
-			fileset (dir: 'pkg')
+			fileset (dir: 'build/vdab/pkg')
 		}
-		delete "libs/VDABCore.jar"
 	}
 }
