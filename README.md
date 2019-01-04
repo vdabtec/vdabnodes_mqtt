@@ -20,7 +20,7 @@ Use of this software is subject to restrictions of the [Apache License 2.0](http
 
 This software makes us of the following components which include their own licensing restrictions:
 
-| | | |
+| | | 
 |  --- |  :---: |
 | MQTT Java Library - Eclipse | [Eclipse Distribution License v1](https://projects.eclipse.org/content/eclipse-distribution-license-1.0-bsd) |
 | MQTT Java Library - Eclipse | [Eclipse Public License v1](https://projects.eclipse.org/content/eclipse-public-license-1.0) |
