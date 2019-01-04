@@ -15,6 +15,16 @@ capabilities it can serve as a powerful <b>IoT Processing Hub</b>
 <li>The <i>FromJSON</i> node is used to parse MQTT data that is represented as JSON.
 </ul>
 
+### Licensing
+Use of this software is subject to restrictions of the [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt).
+
+This software makes us of the following components which include their own licensing restrictions:
+
+| | | |
+|  --- |  :---: |
+| MQTT Java Library - Eclipse | [Eclipse Distribution License v1](https://projects.eclipse.org/content/eclipse-distribution-license-1.0-bsd) |
+| MQTT Java Library - Eclipse | [Eclipse Public License v1](https://projects.eclipse.org/content/eclipse-public-license-1.0) |
+
 ### Loading the the Package
 The current or standard version can be loaded directly using the VDAB Android Client following the directions
 for [Adding Packages](https://vdabtec.com/vdab/docs/VDABGUIDE_AddingPackages.pdf) 
