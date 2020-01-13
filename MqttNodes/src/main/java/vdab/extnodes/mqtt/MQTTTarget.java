@@ -15,6 +15,8 @@
 */
 package vdab.extnodes.mqtt;
 
+import java.util.HashMap;
+
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
 import org.eclipse.paho.client.mqttv3.MqttClient;
@@ -34,7 +36,8 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 		MQTTQualityOfService.getEnum();
 		MQTTPersistenceType.getEnum();
 	}
-
+	private static final int MAXFAILURES = 4;
+	private int c_NoFailures = 0;
 	private String c_BrokerServer;
 	private Integer c_BrokerPort;
 	private String c_User; 
@@ -44,6 +47,7 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 	private Integer c_PersistenceType = Integer.valueOf(MQTTPersistenceType.FILE);
 	private MqttClientPersistence c_ClientPersistence;
 	private Integer c_Qos = Integer.valueOf(MQTTQualityOfService.ATMOSTONCE);
+	private HashMap<String, MqttTopic> c_map_MqttTopics = new HashMap<String, MqttTopic>();
 
 	MqttConnectOptions c_ConnectOptions; 
 	MqttClient c_ClientConnection;
@@ -134,11 +138,25 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 		MqttMessage msg = new MqttMessage(txt.getBytes());
 		msg.setQos(c_Qos.intValue());
 		msg.setRetained(false);
-
 		MqttDeliveryToken token = null;
 		try {
 			// publish message to broker
-			token = c_Topic.publish(msg);
+			try {
+				MqttTopic topic = getCurrentTopic();
+
+				token = topic.publish(msg);
+			}
+			catch (Exception e) {
+
+				if (c_NoFailures > MAXFAILURES)
+					throw e;
+				c_NoFailures++;
+				setWarning("MQTT PUBLISHING failure, one event droppered, NOFAILURES="+c_NoFailures+" e>"+e);
+				disconnect();
+				connectToMQTT();
+				return;
+			}
+
 			if (isLogLevel(LogLevel.TRACE))
 				logTrace("MQTT PUBLISHING data TOPIC="+c_Topic+" QOS="+c_Qos.intValue()+" MSG="+msg);
 
@@ -146,15 +164,33 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 			token.waitForCompletion();
 		} 
 		catch (Exception e) {
-			setError("MQTT PUBLISHER: Failed sending message to the broker e>"+e);
+			setError("MQTT PUBLISHER: Failed sending message to the broker. Max retries reached. e>"+e);
 			_disable();
 
 		}
 	}
 	// SUPPORTING Methods -----------------------------------------------
+	private MqttTopic getCurrentTopic(){
 
+		String topicPath = MQTTUtility.buildTopicPublishPath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);
+		MqttTopic topic = c_map_MqttTopics.get(topicPath);
+		if (topic != null)
+			return topic;
+		
+		try {
+			topic = c_ClientConnection.getTopic(topicPath);
+			c_map_MqttTopics.put(topicPath, topic);
+			if (isLogLevel(LogLevel.TRACE))
+				logTrace("MQTT PUBLISHER connecting to TOPIC="+topicPath+"QOS="+c_Qos.intValue());
+		}
+		catch (Exception e){
+			setError("MQTT PUBLISHER unable to connect to TOPIC="+topicPath+" e>"+e);
+		}
+		return topic;
+	}
 	private void connectToMQTT(){
 		try {
+			c_map_MqttTopics.clear();
 			c_ConnectOptions = new MqttConnectOptions(); 
 			c_ConnectOptions.setCleanSession(true); 
 			c_ConnectOptions.setKeepAliveInterval(30); 
@@ -162,13 +198,8 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 				c_ConnectOptions.setUserName(c_User); 
 				c_ConnectOptions.setPassword(c_Password.toCharArray()); 
 			}
-			c_ClientPersistence = MQTTUtility.createAndReturnPersistence(c_PersistenceType);
-			c_ClientConnection = new MqttClient(MQTTUtility.buildBrokerURL(c_BrokerServer,c_BrokerPort), c_DeviceId, c_ClientPersistence); 
+			c_ClientConnection = new MqttClient(MQTTUtility.buildBrokerURL(c_BrokerServer,c_BrokerPort), getObjectPublicKey(), c_ClientPersistence); 
 			c_ClientConnection.connect(c_ConnectOptions); 
-			String topicPath = MQTTUtility.buildTopicPublishPath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);
-			c_Topic = c_ClientConnection.getTopic(topicPath);
-			if (isLogLevel(LogLevel.TRACE))
-				logTrace("MQTT PUBLISHER connecting to TOPIC="+topicPath+"QOS="+c_Qos.intValue());
 		} 
 		catch (Exception e) { 
 			setError("MQTT PUBLISHER failed connection to server e>"+e);
@@ -177,6 +208,7 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 		}
 	}
 	private void disconnect(){
+		c_map_MqttTopics.clear();
 		try {
 			if (c_ClientConnection != null){
 				c_ClientConnection.disconnect();
