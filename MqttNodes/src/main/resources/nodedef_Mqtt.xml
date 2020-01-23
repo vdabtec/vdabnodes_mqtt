@@ -4,7 +4,7 @@
 	<attr name="Group">MQTT</attr>
 	<attr name="ConsumedEventTypes">NONE</attr>
     <attr name="PublishedEventTypes">Event,Trigger</attr>
-    <attr name="NodeDescTemplate">SUB to ${DevicePath}/${DeviceId}</attr>
+    <attr name="NodeDescTemplate">SUB to ${TopicInfo}</attr>
     <attr name="NodeOverview">Listens for and receives MQTT messages on a specific topic or topics</attr>	
     <attr name="NodeQuality" >Released</attr>     
     <datadef  name="Password">
@@ -29,15 +29,20 @@
 	    <attr name="DefaultValue" type="Integer">1883</attr>
 		<attr name="Category">Required</attr>
 	</datadef>
-	<datadef name="DevicePath">
+	<datadef name="Topic">
 	   <attr name="EditOrder" type="Integer">13</attr>    
+	   	<attr name="Desc" >MQTT Topic to listen to. Enter # to listen to all topics. </attr>	
+		<attr name="Category">Standard</attr>
+	</datadef>
+	<datadef name="DevicePath">
+	   <attr name="EditOrder" type="Integer">33</attr>    
 	   	<attr name="Desc" >The path of the topic for the device. Enter # to listen to all topics</attr>	
-		<attr name="Category">Required</attr>
+		<attr name="Category">Advanced</attr>
 	</datadef>
 	<datadef name="DeviceId">
-	   <attr name="EditOrder" type="Integer">14</attr>    
+	   <attr name="EditOrder" type="Integer">34</attr>    
 	   	<attr name="Desc" >The id for the device to listen to. Enter # to listen to all devices on this topic</attr>	
-		<attr name="Category">Standard</attr>
+		<attr name="Category">Advanced</attr>
 	</datadef>
 	<datadef name="QOS">
 	   <attr name="EditOrder" type="Integer">15</attr>    
@@ -56,7 +61,7 @@
 	<attr name="Group">MQTT</attr>
 	<attr name="ConsumedEventTypes">Event</attr>
     <attr name="PublishedEventTypes">NONE</attr>
-    <attr name="NodeDescTemplate">PUB on ${DevicePath}/${DeviceId}</attr>
+    <attr name="NodeDescTemplate">PUB on ${TopicInfo}</attr>
     <attr name="NodeOverview">Publishes MQTT messages to a specified topic.</attr>	
     <attr name="NodeQuality" >Released</attr>     
     <datadef  name="Password">
@@ -81,15 +86,20 @@
 	   	<attr name="DefaultValue" type="Integer">1883</attr>
 		<attr name="Category">Required</attr>
 	</datadef>
-	<datadef name="DevicePath">
+<datadef name="Topic">
 	   <attr name="EditOrder" type="Integer">13</attr>    
-	   	<attr name="Desc" >The path of the topic published to.</attr>	
-		<attr name="Category">Required</attr>
+	   	<attr name="Desc" >MQTT Topic to publish to. Templates are supported. </attr>	
+		<attr name="Category">Standard</attr>
+	</datadef>
+	<datadef name="DevicePath">
+	   <attr name="EditOrder" type="Integer">33</attr>    
+	   	<attr name="Desc" >The path of the topic for the device.</attr>	
+		<attr name="Category">Advanced</attr>
 	</datadef>
 	<datadef name="DeviceId">
-	   <attr name="EditOrder" type="Integer">14</attr>    
-	   	<attr name="Desc" >The id for this the publishing device</attr>	
-		<attr name="Category">Required</attr>
+	   <attr name="EditOrder" type="Integer">34</attr>    
+	   	<attr name="Desc" >The id for the device.</attr>	
+		<attr name="Category">Advanced</attr>
 	</datadef>
 	<datadef name="QOS">
 	   <attr name="EditOrder" type="Integer">15</attr>    

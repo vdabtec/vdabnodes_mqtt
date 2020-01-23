@@ -30,6 +30,8 @@ import com.lcrc.af.AnalysisEvent;
 import com.lcrc.af.AnalysisTarget;
 import com.lcrc.af.constants.IconCategory;
 import com.lcrc.af.constants.LogLevel;
+import com.lcrc.af.util.AnalysisDataUtility;
+import com.lcrc.af.util.StringUtility;
 
 public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 	static {
@@ -44,6 +46,7 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 	private String c_Password; ;
 	private String c_DevicePath;
 	private String c_DeviceId;
+	private String c_TopicPath;
 	private Integer c_PersistenceType = Integer.valueOf(MQTTPersistenceType.FILE);
 	private MqttClientPersistence c_ClientPersistence;
 	private Integer c_Qos = Integer.valueOf(MQTTQualityOfService.ATMOSTONCE);
@@ -81,6 +84,12 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 	public void set_Password( String password){
 		c_Password = password;
 	}
+	public void set_Topic(String topic){
+		c_TopicPath = topic;
+	}
+	public String get_Topic(){
+		return c_TopicPath;
+	}
 	public void set_DevicePath(String path){
 		c_DevicePath = path;
 	}
@@ -104,6 +113,11 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 	}
 	public void set_PersistenceType(Integer type){
 		c_PersistenceType = type;
+	}
+	public String get_TopicInfo(){
+		if (c_TopicPath != null)
+			return c_TopicPath;
+		return MQTTUtility.buildTopicPublishPath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);
 	}
 	// ANALYSIS NODE Methods -----------------------------------------
 	public void _init(){
@@ -142,8 +156,7 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 		try {
 			// publish message to broker
 			try {
-				MqttTopic topic = getCurrentTopic();
-
+				MqttTopic topic = getCurrentTopic(ev);
 				token = topic.publish(msg);
 			}
 			catch (Exception e) {
@@ -170,9 +183,25 @@ public class MQTTTarget extends AnalysisTarget implements MqttCallback{
 		}
 	}
 	// SUPPORTING Methods -----------------------------------------------
-	private MqttTopic getCurrentTopic(){
-
-		String topicPath = MQTTUtility.buildTopicPublishPath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);
+	private MqttTopic getCurrentTopic(AnalysisEvent ev){
+		
+		String topicPath ;
+		// LATEST - Support single TOPIC attribute which can include tags.
+		if (c_TopicPath != null){
+			if (StringUtility.hasTags(c_TopicPath)){
+				HashMap<String,String> tvMap = AnalysisDataUtility.buildTagValueMap(ev.getAnalysisData());
+				// Build body with tags if necessary
+				topicPath  = getTemplateAttribute( "Topic", tvMap);
+			}
+			else {
+				topicPath = c_TopicPath;
+			}
+		}
+		// DEPRECATE - Old two part device defined path;
+		else {
+			topicPath = MQTTUtility.buildTopicPublishPath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);
+		}
+				
 		MqttTopic topic = c_map_MqttTopics.get(topicPath);
 		if (topic != null)
 			return topic;

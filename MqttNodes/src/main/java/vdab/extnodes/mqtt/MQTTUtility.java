@@ -96,7 +96,6 @@ public class MQTTUtility {
 	}
 	public static String buildTopicPublishPath(String server, Integer port, String path, String devid){
 		StringBuilder sb = new StringBuilder();
-
 		sb.append(MQTT_PATH_DELIM);
 		sb.append(path);
 		sb.append(MQTT_PATH_DELIM);		

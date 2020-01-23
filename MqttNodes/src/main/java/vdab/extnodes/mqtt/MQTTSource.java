@@ -40,6 +40,7 @@ public class MQTTSource extends AnalysisSource implements MqttCallback {
 	private String c_Password; ;
 	private String c_DeviceId;
 	private String c_DevicePath;
+	private String c_TopicPath;
 	private Integer c_PersistenceType = Integer.valueOf(MQTTPersistenceType.FILE);
 	private MqttClientPersistence c_ClientPersistence;
 	private Integer c_Qos = Integer.valueOf(MQTTQualityOfService.ATMOSTONCE);
@@ -80,6 +81,12 @@ public class MQTTSource extends AnalysisSource implements MqttCallback {
 	public void set_Password( String password){
 		c_Password = password;
 	}
+	public void set_Topic(String topic){
+		c_TopicPath = topic;
+	}
+	public String get_Topic(){
+		return c_TopicPath;
+	}
 	public void set_DevicePath(String path){
 		c_DevicePath = path;
 	}
@@ -103,6 +110,11 @@ public class MQTTSource extends AnalysisSource implements MqttCallback {
 	}
 	public void set_PersistenceType(Integer type){
 		c_PersistenceType = type;
+	}
+	public String get_TopicInfo(){
+		if (c_TopicPath != null)
+			return c_TopicPath;
+		return MQTTUtility.buildTopicPublishPath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);
 	}
 	// ANALYSIS NODE Methods -------------------------------
 	public void _init(){
@@ -136,10 +148,11 @@ public class MQTTSource extends AnalysisSource implements MqttCallback {
 			c_ClientConnection = new MqttClient(MQTTUtility.buildBrokerURL(c_BrokerServer,c_BrokerPort),getObjectPublicKey(), c_ClientPersistence ); 
 			c_ClientConnection.setCallback(this); 
 			c_ClientConnection.connect(c_ConnectOptions); 
-			String topicPath = MQTTUtility.buildTopicSubscribePath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);	
-			c_ClientConnection.subscribe(topicPath , c_Qos.intValue());
+			if (c_TopicPath == null)
+				c_TopicPath = MQTTUtility.buildTopicSubscribePath(c_BrokerServer, c_BrokerPort, c_DevicePath, c_DeviceId);	
+			c_ClientConnection.subscribe(c_TopicPath , c_Qos.intValue());
 			if (isLogLevel(LogLevel.TRACE))
-				logTrace("MQTT SUBSCRIBER connecting to TOPIC="+topicPath+" QOS="+c_Qos.intValue());
+				logTrace("MQTT SUBSCRIBER connecting to TOPIC="+c_TopicPath+" QOS="+c_Qos.intValue());
 		} 
 		catch (Exception e) { 
 			setError("MQTT SUBSCRIBER Failed connection to Server e>"+e);
